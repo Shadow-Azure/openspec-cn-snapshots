@@ -123,7 +123,7 @@ manifest.json                     # 源信息 + 工具版本 + 每个产物的 d
 {
   "objectType": "skill",
   "objectName": "codespec-subagent-driven-development",
-  "repoUrl": "https://github.com/<org>/<本仓>.git",
+  "repoUrl": "https://github.com/Shadow-Azure/openspec-cn-snapshots.git",
   "subDir": "skills/codespec-subagent-driven-development",
   "defaultRef": "openspec-cn-a7ec200-claude-core",
   "enabled": true
