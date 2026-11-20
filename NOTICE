@@ -1,0 +1,19 @@
+NOTICE
+
+本仓包含的生成产物与测试 fixture 派生自以下上游项目，均按 MIT 许可证发布：
+
+1. OpenSpec-cn（生成产物来源）
+   https://github.com/chenmr0/OpenSpec-cn
+   fork 链：Fission-AI/OpenSpec -> studyzy/OpenSpec-cn -> chenmr0/OpenSpec-cn
+   License: MIT
+   本仓的 skills/ agents/ commands/ 是由其 codespec CLI（codespec init）生成的派生快照。
+
+2. obra/superpowers（digest 测试向量来源）
+   https://github.com/obra/superpowers
+   skills/systematic-debugging/SKILL.md @ v6.4.1
+   Copyright (c) 2025 Jesse Vincent
+   License: MIT
+   副本仅用于 tests/fixtures/ 内的 digest 回归测试，用于锚定与平台一致的计算行为。
+
+3. Harness Evolution 平台（digest 算法的参考实现）
+   scripts/digest.mjs 与 apps/api/app/utils/definition.py 保持一致。

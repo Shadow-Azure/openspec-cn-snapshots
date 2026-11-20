@@ -1,0 +1,231 @@
+name: snapshot-openspec-cn
+
+run-name: snapshot ${{ github.event.inputs.source_ref }} → ${{ github.event.inputs.tool }}/${{ github.event.inputs.profile }}${{ github.event.inputs.dry_run == 'true' && ' (dry-run)' || '' }}
+
+# 从指定 OpenSpec-cn commit 生成产物快照：构建 → codespec init → 物化 → digest 校验 → commit → 不可变 tag。
+# 规则（见 README）：
+#   - tag 一旦发布不可覆盖、不可移动；重复运行同一输入幂等失败并提示已有 tag。
+#   - 生成 / 校验 / 扫描任一失败：不 commit、不打 tag。
+#   - 脚本与 digests.lock.json 以 main 分支为准（ci/ 检出），快照 commit 只改产物与 manifest。
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "源仓（owner/repo）"
+        required: false
+        default: "chenmr0/OpenSpec-cn"
+      source_ref:
+        description: "源 commit / 分支 / tag（必填）"
+        required: true
+      tool:
+        description: "codespec --tools 目标工具（轨迹环境为 Claude Code）"
+        required: false
+        default: "claude"
+      profile:
+        description: "codespec --profile 档案"
+        required: false
+        default: "core"
+      expected_object:
+        description: "可选：校验单个对象名（与 expected_digest 成对使用）"
+        required: false
+        default: ""
+      expected_digest:
+        description: "可选：该对象的期望 digest（digest:…）"
+        required: false
+        default: ""
+      dry_run:
+        description: "只生成与校验，不 commit / 不打 tag"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot-${{ github.event.inputs.source_ref }}-${{ github.event.inputs.tool }}-${{ github.event.inputs.profile }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 检出 main（脚本与 digests.lock 的唯一来源）
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          path: ci
+
+      - name: 检出 snapshots 分支（快照写入目标）
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: snapshots
+          path: workspace
+
+      - name: 检出 OpenSpec-cn 源仓
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          repository: ${{ github.event.inputs.source_repo }}
+          ref: ${{ github.event.inputs.source_ref }}
+          path: openspec-cn
+          # 公开源仓用默认 token 即可；私有源仓可配只读 SOURCE_REPO_TOKEN secret
+          token: ${{ secrets.SOURCE_REPO_TOKEN != '' && secrets.SOURCE_REPO_TOKEN || github.token }}
+
+      - name: 安装 pnpm（固定大版本）
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: openspec-cn/pnpm-lock.yaml
+
+      - name: 构建源仓
+        working-directory: openspec-cn
+        run: |
+          set -o pipefail
+          if ! pnpm install --frozen-lockfile; then
+            echo "::warning::--frozen-lockfile 失败（源仓 lockfile 与 package.json 不一致，例如 a7ec200 新增 jsonc-parser 未更锁）。降级 --no-frozen-lockfile 重试，manifest 将标记 lockfileMode=no-frozen"
+            pnpm install --no-frozen-lockfile
+            echo "SNAPSHOT_LOCKFILE_MODE=no-frozen" >> "$GITHUB_ENV"
+          fi
+          pnpm build
+          test -f bin/codespec.js || { echo "::error::构建后缺少 bin/codespec.js"; exit 1; }
+          test -d dist || { echo "::error::构建后缺少 dist/"; exit 1; }
+
+      - name: 解析版本与 tag 名
+        id: meta
+        run: |
+          set -euo pipefail
+          SHA="$(git -C openspec-cn rev-parse HEAD)"
+          SHORT="$(git -C openspec-cn rev-parse --short=7 HEAD)"
+          CV="$(node -p "require('./openspec-cn/package.json').version")"
+          NODE_V="$(node -p "process.versions.node.split('.')[0]")"
+          PNPM_V="$(pnpm --version)"
+          sanitize() { printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9-]/-/g' -e 's/-\{2,\}/-/g' -e 's/^-//' -e 's/-$//'; }
+          TOOL_S="$(sanitize "${{ github.event.inputs.tool }}")"
+          PROFILE_S="$(sanitize "${{ github.event.inputs.profile }}")"
+          if [ -z "$TOOL_S" ] || [ -z "$PROFILE_S" ]; then
+            echo "::error::tool/profile 清洗后为空，无法构造合法 tag 名"; exit 1
+          fi
+          TAG="openspec-cn-${SHORT}-${TOOL_S}-${PROFILE_S}"
+          {
+            echo "sha=$SHA"
+            echo "short=$SHORT"
+            echo "codespec_version=$CV"
+            echo "node_version=$NODE_V"
+            echo "pnpm_version=$PNPM_V"
+            echo "tag=$TAG"
+            echo "lockfile_mode=${SNAPSHOT_LOCKFILE_MODE:-frozen}"
+          } >> "$GITHUB_OUTPUT"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "源 commit=$SHA short=$SHORT codespec=$CV tag=$TAG lockfile=${SNAPSHOT_LOCKFILE_MODE:-frozen}"
+
+      - name: tag 不可变性检查（已存在即失败）
+        run: |
+          set -euo pipefail
+          if git -C workspace ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::tag 已存在: $TAG。tag 不可变：不覆盖、不移动。需要重新生成请换 source_ref 或变体后缀。"
+            exit 1
+          fi
+          echo "tag 可用: $TAG"
+
+      - name: 在临时 fixture 中执行 codespec init
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/fixture && mkdir -p /tmp/fixture
+          node openspec-cn/bin/codespec.js init /tmp/fixture \
+            --tools "${{ github.event.inputs.tool }}" \
+            --profile "${{ github.event.inputs.profile }}" \
+            --force
+          test -d /tmp/fixture/.claude || { echo "::error::init 后没有 .claude/ 生成物"; exit 1; }
+
+      - name: 物化产物并生成 manifest
+        run: |
+          set -euo pipefail
+          node ci/scripts/materialize.mjs \
+            --fixture /tmp/fixture \
+            --out workspace \
+            --source-repo "https://github.com/${{ github.event.inputs.source_repo }}" \
+            --source-ref "${{ github.event.inputs.source_ref }}" \
+            --source-commit "${{ steps.meta.outputs.sha }}" \
+            --codespec-version "${{ steps.meta.outputs.codespec_version }}" \
+            --tool "${{ github.event.inputs.tool }}" \
+            --profile "${{ github.event.inputs.profile }}" \
+            --workflow-run "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --lockfile-mode "${{ steps.meta.outputs.lockfile_mode }}" \
+            --node-version "${{ steps.meta.outputs.node_version }}" \
+            --pnpm-version "${{ steps.meta.outputs.pnpm_version }}"
+
+      - name: 校验（manifest 一致性 + digests.lock + 期望值）
+        env:
+          EXPECTED_OBJECT: ${{ github.event.inputs.expected_object }}
+          EXPECTED_DIGEST: ${{ github.event.inputs.expected_digest }}
+        run: |
+          node ci/scripts/verify.mjs \
+            --manifest workspace/manifest.json \
+            --lock ci/digests.lock.json \
+            --variant "${{ github.event.inputs.tool }}/${{ github.event.inputs.profile }}"
+
+      - name: 安全扫描（密钥 / 本地路径泄漏）
+        run: |
+          node ci/scripts/scan-secrets.mjs \
+            workspace/skills workspace/agents workspace/commands workspace/manifest.json
+
+      - name: 上传 manifest（排查用）
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: manifest-${{ env.TAG }}
+          path: workspace/manifest.json
+          if-no-files-found: warn
+
+      - name: 失败时上传 fixture（保留现场）
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fixture-debug-${{ steps.meta.outputs.short }}
+          path: /tmp/fixture
+          if-no-files-found: warn
+
+      - name: commit + 打 tag + push（dry_run 跳过）
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: workspace
+        env:
+          SOURCE_REF: ${{ github.event.inputs.source_ref }}
+          CODESPEC_VERSION: ${{ steps.meta.outputs.codespec_version }}
+        run: |
+          set -euo pipefail
+          TOOL="${{ github.event.inputs.tool }}"
+          PROFILE="${{ github.event.inputs.profile }}"
+          SHORT="${{ steps.meta.outputs.short }}"
+          git config user.name "openspec-cn-snapshot-bot"
+          git config user.email "openspec-cn-snapshot-bot@users.noreply.github.com"
+          git add skills agents commands manifest.json
+          if git diff --cached --quiet; then
+            echo "生成内容与 snapshots HEAD 一致，跳过 commit"
+          else
+            git commit -m "snapshot(${SHORT}): ${TOOL}/${PROFILE} from ${SOURCE_REF}"
+          fi
+          if ! git push origin HEAD:snapshots; then
+            echo "::error::push snapshots 失败。若为分支保护拦截，请允许 workflow（GITHUB_TOKEN/bot）推送 snapshots 分支。"
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "::error::tag 已存在（并发或重复运行）: $TAG。不覆盖、不移动。"
+            exit 1
+          fi
+          git tag -a "$TAG" -m "openspec-cn ${SHORT} · ${TOOL}/${PROFILE} · codespec ${CODESPEC_VERSION}"
+          if ! git push origin "refs/tags/$TAG"; then
+            echo "::error::tag push 失败。若为 tag 保护拦截，请允许 workflow（GITHUB_TOKEN/bot）创建 tags/*。"
+            exit 1
+          fi
+          echo "已发布 tag: $TAG -> $(git rev-parse HEAD)"

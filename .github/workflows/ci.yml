@@ -1,0 +1,73 @@
+name: ci
+
+# main 分支脚本与 lock 的守门：digest 单元测试 + lock 格式校验 + materialize/verify 冒烟。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - "digests.lock.json"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "tests/**"
+      - "digests.lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  unit-and-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: digest 单元测试（含 superpowers 真实向量）
+        run: node --test
+
+      - name: digests.lock.json 格式校验
+        run: |
+          node -e '
+            const l = require("./digests.lock.json");
+            if (l.schemaVersion !== 1) { console.error("schemaVersion 必须 = 1"); process.exit(1); }
+            if (!l.variants || typeof l.variants !== "object") { console.error("缺少 variants"); process.exit(1); }
+            let n = 0;
+            for (const [variant, group] of Object.entries(l.variants)) {
+              for (const [name, digest] of Object.entries(group)) {
+                if (!/^digest:[0-9a-f]{64}$/.test(digest)) {
+                  console.error(`非法 digest: ${variant}/${name} = ${digest}`);
+                  process.exit(1);
+                }
+                n++;
+              }
+            }
+            console.log(`lock OK: ${n} 条锁定`);
+          '
+
+      - name: 冒烟：materialize + verify + scan（合成 fixture）
+        env:
+          EXPECTED_OBJECT: demo-skill
+        run: |
+          mkdir -p /tmp/fx/.claude/skills/demo-skill /tmp/fx/.claude/agents /tmp/fx/.claude/commands/opsx
+          printf -- '---\nname: demo-skill\n---\n\nDemo body.\n' > /tmp/fx/.claude/skills/demo-skill/SKILL.md
+          printf -- '---\nname: demo-agent\n---\n\nAgent body.\n' > /tmp/fx/.claude/agents/demo-agent.md
+          printf -- '---\n\nCmd body.\n' > /tmp/fx/.claude/commands/opsx/demo.md
+          node scripts/materialize.mjs --fixture /tmp/fx --out /tmp/out \
+            --source-repo https://github.com/chenmr0/OpenSpec-cn \
+            --source-ref ci-smoke \
+            --source-commit 0000000000000000000000000000000000000000 \
+            --codespec-version 0.0.0 --tool claude --profile core \
+            --workflow-run ci-smoke
+          EXPECTED_DIGEST="$(node scripts/digest.mjs /tmp/out/skills/demo-skill/SKILL.md | cut -f2)"
+          export EXPECTED_DIGEST
+          node scripts/verify.mjs --manifest /tmp/out/manifest.json --lock /tmp/no-lock.json --variant claude/core
+          node scripts/scan-secrets.mjs /tmp/out/skills /tmp/out/agents /tmp/out/commands /tmp/out/manifest.json
+          echo "smoke OK"
