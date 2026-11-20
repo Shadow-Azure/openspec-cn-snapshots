@@ -176,6 +176,7 @@ manifest.json                     # 源信息 + 工具版本 + 每个产物的 d
 2. config 变体（`-cfg<8hex>` tag 后缀）已预留命名规则，workflow 暂不注入自定义 config。
 3. 旧 tag 保留策略与仓库体积上限未定；当前只增不删。
 4. 同一 source_ref + tool + profile 重复运行会因 tag 已存在而幂等失败——这是特性，不是 bug。
+5. 触发方式：经确认（2026-11-20）**保持纯 `workflow_dispatch` 手动触发**，不自动跟踪上游更新——每个快照都是有意发布；换新 source_ref 时若 digest 与 lock 不一致，workflow 会失败并输出 diff，人工核对新产物并更新 `digests.lock.json` 后再正式发版。如需自动化，`schedule` / `repository_dispatch` 是预留扩展点。
 
 ## 文件地图
 
