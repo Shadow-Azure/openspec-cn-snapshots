@@ -196,12 +196,27 @@ jobs:
           path: /tmp/fixture
           if-no-files-found: warn
 
-      - name: commit + 打 tag + push（dry_run 跳过）
+      - name: commit + 打 tag + push（dry_run 跳过；含并发竞态重试）
         if: ${{ github.event.inputs.dry_run != 'true' }}
         working-directory: workspace
         env:
           SOURCE_REF: ${{ github.event.inputs.source_ref }}
           CODESPEC_VERSION: ${{ steps.meta.outputs.codespec_version }}
+          # 与上方「物化产物并生成 manifest」步骤的参数保持一致（--out 除外：此处工作目录就是 workspace）
+          MATERIALIZE_ARGS: >-
+            --fixture /tmp/fixture
+            --source-repo https://github.com/${{ github.event.inputs.source_repo }}
+            --source-ref ${{ github.event.inputs.source_ref }}
+            --source-commit ${{ steps.meta.outputs.sha }}
+            --codespec-version ${{ steps.meta.outputs.codespec_version }}
+            --tool ${{ github.event.inputs.tool }}
+            --profile ${{ github.event.inputs.profile }}
+            --workflow-run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            --lockfile-mode ${{ steps.meta.outputs.lockfile_mode }}
+            --node-version ${{ steps.meta.outputs.node_version }}
+            --pnpm-version ${{ steps.meta.outputs.pnpm_version }}
+          EXPECTED_OBJECT: ${{ github.event.inputs.expected_object }}
+          EXPECTED_DIGEST: ${{ github.event.inputs.expected_digest }}
         run: |
           set -euo pipefail
           TOOL="${{ github.event.inputs.tool }}"
@@ -209,13 +224,26 @@ jobs:
           SHORT="${{ steps.meta.outputs.short }}"
           git config user.name "openspec-cn-snapshot-bot"
           git config user.email "openspec-cn-snapshot-bot@users.noreply.github.com"
-          git add skills agents commands manifest.json
-          if git diff --cached --quiet; then
-            echo "生成内容与 snapshots HEAD 一致，跳过 commit"
-          else
-            git commit -m "snapshot(${SHORT}): ${TOOL}/${PROFILE} from ${SOURCE_REF}"
-          fi
-          if ! git push origin HEAD:snapshots; then
+          pushed=0
+          for attempt in 1 2 3; do
+            # 并发安全：多个不同 source_ref 的运行会同时写 snapshots 分支，
+            # push 被拒时基于最新远端重做（fixture 仍在，物化幂等，digest 确定）
+            git fetch origin snapshots
+            git reset --hard origin/snapshots
+            node ../ci/scripts/materialize.mjs --out . $MATERIALIZE_ARGS
+            node ../ci/scripts/verify.mjs --manifest manifest.json --lock ../ci/digests.lock.json \
+              --variant "${TOOL}/${PROFILE}"
+            node ../ci/scripts/scan-secrets.mjs skills agents commands manifest.json
+            git add skills agents commands manifest.json
+            if git diff --cached --quiet; then
+              echo "生成内容与 snapshots HEAD 一致，跳过 commit"
+            else
+              git commit -m "snapshot(${SHORT}): ${TOOL}/${PROFILE} from ${SOURCE_REF}"
+            fi
+            if git push origin HEAD:snapshots; then pushed=1; break; fi
+            echo "::warning::push snapshots 被拒（并发运行竞争），第 ${attempt}/3 次基于最新远端重做"
+          done
+          if [ "$pushed" != "1" ]; then
             echo "::error::push snapshots 失败。若为分支保护拦截，请允许 workflow（GITHUB_TOKEN/bot）推送 snapshots 分支。"
             exit 1
           fi
