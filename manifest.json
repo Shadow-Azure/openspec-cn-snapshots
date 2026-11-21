@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "source": {
     "repo": "https://github.com/chenmr0/OpenSpec-cn",
-    "branch": "31cda2f8fddf6bc0a8a04405665317ae94a9efd8",
-    "commit": "31cda2f8fddf6bc0a8a04405665317ae94a9efd8",
+    "branch": "e55a5e28a38e4ee483ac34220847b388f9850214",
+    "commit": "e55a5e28a38e4ee483ac34220847b388f9850214",
     "codespecVersion": "1.3.1",
     "node": "22",
     "pnpm": "10.34.9"
@@ -18,59 +18,87 @@
       "core",
       "--force"
     ],
-    "lockfileMode": "frozen",
-    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858940217",
-    "generatedAt": "2026-11-21T03:01:42.434Z"
+    "lockfileMode": "no-frozen",
+    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858959711",
+    "generatedAt": "2026-11-21T03:01:56.808Z"
   },
   "artifacts": [
+    {
+      "type": "agent",
+      "name": "change-verifier",
+      "path": "agents/change-verifier/AGENT.md",
+      "sourcePath": ".claude/agents/change-verifier.md",
+      "digest": "digest:a750620fb63ef6a0d525b549146ecfec2de4d8026e90da81f78ea6af0e39401b"
+    },
     {
       "type": "agent",
       "name": "code-generator",
       "path": "agents/code-generator/AGENT.md",
       "sourcePath": ".claude/agents/code-generator.md",
-      "digest": "digest:92d22df7c5c2e703c1df793d07b28354d26eed60372d26b2a5713f8950d7d8d7"
+      "digest": "digest:c816a39ed560a05402b8a1eb2ffdb935d8074101e3aba3f6dc19c545820e83f9"
     },
     {
       "type": "agent",
-      "name": "code-reviewer",
-      "path": "agents/code-reviewer/AGENT.md",
-      "sourcePath": ".claude/agents/code-reviewer.md",
-      "digest": "digest:25430468bb20141a52241fbcb83ab1f7bd6927ba4bbc5083bb80850caaa25ef7"
+      "name": "code-quality-reviewer",
+      "path": "agents/code-quality-reviewer/AGENT.md",
+      "sourcePath": ".claude/agents/code-quality-reviewer.md",
+      "digest": "digest:3742e03fe7d021f9dfc4c512004e8c0a0fdbd4a5c909ce95d122464cce919d41"
+    },
+    {
+      "type": "agent",
+      "name": "concept-clarify",
+      "path": "agents/concept-clarify/AGENT.md",
+      "sourcePath": ".claude/agents/concept-clarify.md",
+      "digest": "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8"
+    },
+    {
+      "type": "agent",
+      "name": "spec-reviewer",
+      "path": "agents/spec-reviewer/AGENT.md",
+      "sourcePath": ".claude/agents/spec-reviewer.md",
+      "digest": "digest:86b6567b1533862bc8a968e57653d5119146283e5d25e11566fd262d088a2ea6"
     },
     {
       "type": "command",
       "name": "opsx:apply",
       "path": "commands/opsx/apply.md",
       "sourcePath": ".claude/commands/opsx/apply.md",
-      "digest": "digest:270970bd7feeb189a9a57fb441aa8ccb8535521babe32641a64cc7d0dee260a9"
+      "digest": "digest:50988b48ceddc540dbf6600af2f7b039ec23929251bd6b879a75d307eb01a34f"
     },
     {
       "type": "command",
       "name": "opsx:archive",
       "path": "commands/opsx/archive.md",
       "sourcePath": ".claude/commands/opsx/archive.md",
-      "digest": "digest:f0ef030cbea9f74ed15055f3916e9fddf5057551aaf713a5c8957ad505a875d7"
+      "digest": "digest:539785a1be9153ca99f611529f91c9bc8b442f2a3f9e42a45b5ec2b38799e1dc"
     },
     {
       "type": "command",
-      "name": "opsx:explore",
-      "path": "commands/opsx/explore.md",
-      "sourcePath": ".claude/commands/opsx/explore.md",
-      "digest": "digest:45f76df0b907946adc6c297b3c2cb50ceb135211605735c3abd930c1b6a36d9f"
+      "name": "opsx:design",
+      "path": "commands/opsx/design.md",
+      "sourcePath": ".claude/commands/opsx/design.md",
+      "digest": "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478"
     },
     {
       "type": "command",
       "name": "opsx:propose",
       "path": "commands/opsx/propose.md",
       "sourcePath": ".claude/commands/opsx/propose.md",
-      "digest": "digest:06d41905d5f2bf4ccf2de7f807b0599738cabcc7c2bba3bb6ba95e15d1bc07f2"
+      "digest": "digest:207859c1b7679fc6ec86d95dce5ad1e045faff620a64e521d5a6d7fae628e7ab"
+    },
+    {
+      "type": "skill",
+      "name": "main-agent-development",
+      "path": "skills/main-agent-development/SKILL.md",
+      "sourcePath": ".claude/skills/main-agent-development/SKILL.md",
+      "digest": "digest:45efc2e83c6da16b2cd2026ace623721559ebb65aa864e2e22cfd56ba85456d5"
     },
     {
       "type": "skill",
       "name": "subagent-driven-development",
       "path": "skills/subagent-driven-development/SKILL.md",
       "sourcePath": ".claude/skills/subagent-driven-development/SKILL.md",
-      "digest": "digest:025c3a4b4e622d6c91f5bddd3cfd023c2a96e5a623c1e1d778d8c6a9a01f1b3f"
+      "digest": "digest:8fee02d1160a18e77cffa8e49dc70a33461ea0017e0d19da5af16d0cda71ea4c"
     },
     {
       "type": "skill",
@@ -88,10 +116,17 @@
     },
     {
       "type": "skill",
-      "name": "writing-plans",
-      "path": "skills/writing-plans/SKILL.md",
-      "sourcePath": ".claude/skills/writing-plans/SKILL.md",
-      "digest": "digest:841e420c5a57fa6d1acc70ef2f4282ad24645b9e7803c7c229fbe868e0421e28"
+      "name": "writing-plans-main",
+      "path": "skills/writing-plans-main/SKILL.md",
+      "sourcePath": ".claude/skills/writing-plans-main/SKILL.md",
+      "digest": "digest:43ba41a8eadbbd823f1bed32d24fd0334813d6e3e99f808f49e09cde33ee550c"
+    },
+    {
+      "type": "skill",
+      "name": "writing-plans-subagent",
+      "path": "skills/writing-plans-subagent/SKILL.md",
+      "sourcePath": ".claude/skills/writing-plans-subagent/SKILL.md",
+      "digest": "digest:4973093a8aa74216141b8b38cbfc00faecd5cd142a203d5f0e6ab093a0d2ce84"
     }
   ]
 }
