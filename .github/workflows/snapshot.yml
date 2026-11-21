@@ -18,6 +18,10 @@ on:
       source_ref:
         description: "源 commit / 分支 / tag（必填）"
         required: true
+      source_branch:
+        description: "源分支名（仅用于 tag 命名 openspec-cn-<branch>-<commit>-…；source_ref 为 commit 时建议提供）"
+        required: false
+        default: ""
       tool:
         description: "codespec --tools 目标工具（轨迹环境为 Claude Code）"
         required: false
@@ -116,10 +120,16 @@ jobs:
           if [ -z "$TOOL_S" ] || [ -z "$PROFILE_S" ]; then
             echo "::error::tool/profile 清洗后为空，无法构造合法 tag 名"; exit 1
           fi
-          TAG="openspec-cn-${SHORT}-${TOOL_S}-${PROFILE_S}"
+          BRANCH_S="$(sanitize "${{ github.event.inputs.source_branch }}")"
+          if [ -n "$BRANCH_S" ]; then
+            TAG="openspec-cn-${BRANCH_S}-${SHORT}-${TOOL_S}-${PROFILE_S}"
+          else
+            TAG="openspec-cn-${SHORT}-${TOOL_S}-${PROFILE_S}"
+          fi
           {
             echo "sha=$SHA"
             echo "short=$SHORT"
+            echo "branch=$BRANCH_S"
             echo "codespec_version=$CV"
             echo "node_version=$NODE_V"
             echo "pnpm_version=$PNPM_V"
@@ -156,6 +166,7 @@ jobs:
             --out workspace \
             --source-repo "https://github.com/${{ github.event.inputs.source_repo }}" \
             --source-ref "${{ github.event.inputs.source_ref }}" \
+            --source-branch "${{ github.event.inputs.source_branch }}" \
             --source-commit "${{ steps.meta.outputs.sha }}" \
             --codespec-version "${{ steps.meta.outputs.codespec_version }}" \
             --tool "${{ github.event.inputs.tool }}" \
@@ -207,6 +218,7 @@ jobs:
             --fixture /tmp/fixture
             --source-repo https://github.com/${{ github.event.inputs.source_repo }}
             --source-ref ${{ github.event.inputs.source_ref }}
+            --source-branch ${{ github.event.inputs.source_branch }}
             --source-commit ${{ steps.meta.outputs.sha }}
             --codespec-version ${{ steps.meta.outputs.codespec_version }}
             --tool ${{ github.event.inputs.tool }}

@@ -31,6 +31,7 @@ Actions → **snapshot-openspec-cn** → Run workflow：
 |---|---|---|---|
 | `source_repo` | 否 | `chenmr0/OpenSpec-cn` | 源仓 |
 | `source_ref` | **是** | — | commit / 分支 / tag |
+| `source_branch` | 否 | — | 源分支名（仅用于 tag 命名 `openspec-cn-<branch>-…`；source_ref 为 commit 时建议提供） |
 | `tool` | 否 | `claude` | 轨迹环境为 Claude Code |
 | `profile` | 否 | `core` | codespec 档案 |
 | `expected_object` / `expected_digest` | 否 | — | 成对使用；单对象期望值校验 |
@@ -60,7 +61,9 @@ snapshots   每次生成一个 commit；tag 指向这里的 commit（不要手�
 
 - **不要一版本一分支**：平台版本列表来自 tag，一个分支可承载任意多个 tag。
 - 快照 commit 只改 `skills/`、`agents/`、`commands/`、`manifest.json`。
-- tag 命名：`openspec-cn-<short_commit>-<tool>-<profile>`，例如 `openspec-cn-a7ec200-claude-core`。
+- tag 命名（2026-11-21 起分支优先）：`openspec-cn-<branch>-<short_commit>-<tool>-<profile>`，
+  例如 `openspec-cn-main-copy-ar-a7ec200-claude-core`；触发时未提供 `source_branch` 则回退为
+  旧格式 `openspec-cn-<short_commit>-<tool>-<profile>`。分支名中的非法字符会被清洗为 `-`。
   同一源 commit 的多 config 变体可扩展 `-cfg<8hex>` 后缀（当前未启用 config 注入）。
 - **tag 不可变**：已存在即失败；不覆盖、不移动、不删除；不 force push。
 
@@ -131,7 +134,7 @@ OpenSpec-cn 新一代产物（`codespec-*` 已改名），跨源同名只能靠 
   "objectName": "codespec-subagent-driven-development",
   "repoUrl": "https://github.com/Shadow-Azure/openspec-cn-snapshots.git",
   "subDir": "skills/codespec-subagent-driven-development",
-  "defaultRef": "openspec-cn-a7ec200-claude-core",
+  "defaultRef": "openspec-cn-main-copy-ar-a7ec200-claude-core",
   "enabled": true
 }
 ```

@@ -33,6 +33,7 @@ import { definitionFileDigest } from "./digest.mjs";
 
 const HELP = `usage: node scripts/materialize.mjs --fixture <dir> --out <dir>
   --source-repo <url> --source-ref <ref> --source-commit <sha>
+  [--source-branch <branch>]   # 真实分支名，写入 manifest.source.branch
   --codespec-version <ver> --tool <tool> --profile <profile>
   --workflow-run <url>
   [--lockfile-mode frozen|no-frozen] [--node-version <major>] [--pnpm-version <ver>]
@@ -191,7 +192,13 @@ function main() {
     schemaVersion: 1,
     source: {
       repo: args["source-repo"],
-      branch: args["source-ref"],
+      // ref = workflow_dispatch 传入的 source_ref 原样（commit / 分支 / tag）
+      // branch = 真实分支名（--source-branch 提供），否则回退为 ref
+      ref: args["source-ref"],
+      branch:
+        args["source-branch"] && args["source-branch"] !== true
+          ? args["source-branch"]
+          : args["source-ref"],
       commit: args["source-commit"],
       codespecVersion: args["codespec-version"],
       node: args["node-version"] ?? null,
