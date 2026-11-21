@@ -1,6 +1,6 @@
 ---
-name: test-driven-development
-description: test-driven-development
+name: codespec-test-driven-development
+description: codespec-test-driven-development
 license: MIT
 compatibility: 无特殊依赖。
 metadata:

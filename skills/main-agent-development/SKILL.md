@@ -13,97 +13,74 @@ metadata:
 
 主 Agent 逐个执行所有任务，不委派子代理。全部任务完成后统一做规格审查和代码质量审查。
 
+**审查步骤：** 本批要执行哪些审查由 `codespec apply flow` 命令动态返回，在需求理解阶段第一步获取并据此执行。
+
 **为什么用主 Agent 直接执行：** 主 Agent 拥有完整对话上下文和项目理解，无子代理上下文重建开销。
 
-**核心原则：** 主 Agent 逐任务执行 + 全部完成后统一审查（先规格后质量）= 高质量、快速迭代
-
-## 流程
-
-```dot
-digraph process {
-    rankdir=TB;
-
-    subgraph cluster_per_task {
-        label="每个任务（主 Agent 直接执行）";
-        "读取任务目标和涉及文件" [shape=box];
-        "读取关联 spec/design 章节" [shape=box];
-        "实现代码、编译、测试、自审" [shape=box];
-        "标记完成（TodoWrite + task.md 复选框）" [shape=box];
-    }
-
-    "读取 spec.md, design.md 和 task.md。建立全局需求理解，提取所有任务，创建 TodoWrite" [shape=box];
-    "还有剩余任务?" [shape=diamond];
-    "分派 spec-reviewer 子代理审查规格合规性" [shape=box];
-    "spec-reviewer 通过?" [shape=diamond];
-    "主 Agent 修复规格差距" [shape=box];
-    "分派 code-quality-reviewer 子代理审查代码质量" [shape=box];
-    "code-quality-reviewer 通过?" [shape=diamond];
-    "主 Agent 修复质量问题" [shape=box];
-    "委派 change-verifier 变更级验证" [shape=box];
-    "验证通过?" [shape=diamond];
-    "修复循环（最多3次）" [shape=box];
-    "报告完成，验证测试通过" [shape=box style=filled fillcolor=lightgreen];
-    "报告暂停——需要人工介入" [shape=box style=filled fillcolor=orange];
-
-    "读取 spec.md, design.md 和 task.md。建立全局需求理解，提取所有任务，创建 TodoWrite" -> "读取任务目标和涉及文件";
-    "读取任务目标和涉及文件" -> "精读关联 spec/design 章节";
-    "精读关联 spec/design 章节" -> "实现代码、编译、测试、自审";
-    "实现代码、编译、测试、自审" -> "标记完成（TodoWrite + task.md 复选框）";
-    "标记完成（TodoWrite + task.md 复选框）" -> "还有剩余任务?";
-    "还有剩余任务?" -> "读取任务目标和涉及文件" [label="是"];
-    "还有剩余任务?" -> "分派 spec-reviewer 子代理审查规格合规性" [label="否"];
-    "分派 spec-reviewer 子代理审查规格合规性" -> "spec-reviewer 通过?";
-    "spec-reviewer 通过?" -> "主 Agent 修复规格差距" [label="否"];
-    "主 Agent 修复规格差距" -> "分派 spec-reviewer 子代理审查规格合规性" [label="重新审查"];
-    "spec-reviewer 通过?" -> "分派 code-quality-reviewer 子代理审查代码质量" [label="是"];
-    "分派 code-quality-reviewer 子代理审查代码质量" -> "code-quality-reviewer 通过?";
-    "code-quality-reviewer 通过?" -> "主 Agent 修复质量问题" [label="否"];
-    "主 Agent 修复质量问题" -> "分派 code-quality-reviewer 子代理审查代码质量" [label="重新审查"];
-    "分派 code-quality-reviewer 子代理审查代码质量" -> "委派 change-verifier 变更级验证";
-    "委派 change-verifier 变更级验证" -> "验证通过?";
-    "验证通过?" -> "修复循环（最多3次）" [label="否"];
-    "修复循环（最多3次）" -> "委派 change-verifier 变更级验证" [label="重新验证"];
-    "验证通过?" -> "报告完成，验证测试通过" [label="是"];
-    "修复循环（最多3次）" -> "报告暂停——需要人工介入" [label="超过3次"];
-}
-```
+**核心原则：** 主 Agent 逐任务执行 + 全部完成后统一审查 = 高质量、快速迭代。实际执行的审查以 `codespec apply flow` 返回为准。
 
 ## 需求理解阶段
 
-在开始执行任何任务之前，读取 spec.md, design.md 和 task.md。建立全局需求理解。
+在开始执行任何任务之前：
+
+1. **获取本批执行流程（关键，第一步）**：
+   - 先读取 task.md 头部的 `测试策略` 标记（`tdd` / `test-after` / `no-test`）；未找到时默认 `tdd`。
+   - 按该策略运行：
+     ```bash
+     codespec apply flow --tdd        # 或 --test-after / --no-test
+     ```
+   - 返回的流程图即本批实际要执行的流程，per-task 子图已按测试策略展开（tdd 为红绿循环、test-after 为实现后补测、no-test 为无测试），**只包含需要执行的审查节点**。
+   - 严格按返回的"执行步骤"顺序执行，不要添加流程图里没有的审查步骤，也不要分派流程图里没有的子代理。
+   - 立即宣布返回的执行步骤，例如："本批执行：逐任务实现 → change-verifier 变更级验证 → 报告完成"。
+2. 读取 spec.md, design.md 和 task.md，建立全局需求理解。
+3. 提取所有任务，创建 TodoWrite（审查条目按下方 TodoWrite 纪律创建，只为 `codespec apply flow` 返回的"执行步骤"中列出的审查创建条目）。
 
 ## 逐任务执行
 
 对每个未完成的任务，按以下步骤执行：
 
-1. **读取任务目标**：从 task.md 中读取当前任务的「目标」和「涉及文件」
-2. **读取关联上下文**：阅读 spec.md / design.md 中与本任务相关的章节
-3. **实现代码**：直接修改涉及文件，遵循现有代码风格和职责边界
-4. **验证**：运行项目构建和测试命令确认变更正确
-5. **标记完成**：在 TodoWrite 中标记任务完成，更新 task.md 复选框
+1. **读取任务**：从 task.md 读取该任务的「任务目标」「涉及文件」「执行步骤」
+2. **按 task.md 的「执行步骤」逐条执行**：严格按步骤顺序，不合并、不跳过、不重排（见"步骤执行纪律"）
+3. **标记完成**：TodoWrite 标记任务完成，更新 task.md 复选框
+
+## 步骤执行纪律
+
+- **严格按 task.md 中该任务的「执行步骤」顺序执行**，不合并、不跳过、不重排——步骤顺序是计划作者精心设计的，违反会导致质量问题
+- **测试策略由 task.md 头部标记驱动**：
+  - `tdd`：先写失败测试并**运行确认失败**，再写最小实现，再**运行确认通过**。不得先实现再补测试
+  - `test-after`：先完成功能实现，再编写单元测试覆盖验收场景并运行通过
+  - `no-test`：仅实现功能代码并编译检查，**禁止**编写或运行任何单元测试
 
 ## 全部任务完成后的统一审查
 
-所有任务完成后，委派子代理审查：
+本批要执行的审查已在需求理解阶段由 `codespec apply flow` 确定，此处按其返回的"执行步骤"委派子代理：
 
-1. **spec-reviewer**：分派 spec-reviewer 子代理审查整体实现的规格合规性
-2. **code-quality-reviewer**：分派 code-quality-reviewer 子代理审查代码质量
-3. **change-verifier**：分派 change-verifier 子代理审查编译 + 测试通过
-4. 如审查发现问题，修复后重新审查直到通过
+- **spec-reviewer**（若列入执行步骤）：分派 spec-reviewer 子代理审查整体实现的规格合规性。通过后在 TodoWrite 中标记完成。
+- **code-quality-reviewer**（若列入执行步骤）：分派 code-quality-reviewer 子代理审查代码质量。通过后在 TodoWrite 中标记完成。
+- **change-verifier**（若列入执行步骤）：分派 change-verifier 子代理审查编译 + 测试通过。通过后在 TodoWrite 中标记完成。
+- 如审查发现问题，修复后重新审查直到通过。
 
 ## 红线
 
+**审查执行纪律（以 `codespec apply flow` 返回的执行步骤为准，必须遵守）：**
+- 执行步骤中**列出**的审查**必须执行**——分派子代理、创建 TodoWrite 条目、走完审查循环。
+- 执行步骤中**未列出**的审查**绝不执行**——不分派子代理、不创建 TodoWrite 条目。
+
 **绝不：**
 - 将任务合并执行（合并会导致完成质量不可控）
-- 跳过审查（规格合规或代码质量）
+- 跳过或重排 task.md 的执行步骤
 - 带着未修复的问题继续
 - 在审查未通过时报告完成
 - 未经用户明确同意就在 main/master 分支上开始实现
 
 **TodoWrite 纪律（关键）：**
-- 在开始实现前，**必须**用 Todo 为所有未完成任务创建条目（只跟踪任务，不跟踪子步骤）
-- 每完成一个任务后，**立即**将其标记为 completed
-- 不要批量标记——完成一个标记一个
+- 在开始实现前，**必须**用 Todo 为所有未完成任务创建条目（只跟踪任务，不跟踪子步骤）。
+- **审查条目按 `codespec apply flow` 返回的"执行步骤"创建**：只为执行步骤中列出的审查创建条目；未列出的审查不创建条目、不分派子代理。例如：
+  - 若执行步骤为"逐任务实现 → change-verifier 变更级验证 → 报告完成"：只为 "change-verifier 变更级验证" 创建条目。
+  - 若执行步骤列出全部三个审查：为 "spec-reviewer 审查规格合规性"、"code-quality-reviewer 审查代码质量"、"change-verifier 变更级验证" 各创建条目。
+- 每完成一个任务后，**立即**将其标记为 completed。
+- 每个审查步骤通过后，**立即**在 TodoWrite 中标记完成。
+- 不要批量标记——完成一个标记一个。
 
 **task.md 复选框同步（关键）：**
 - 每完成一个任务后，**同时**用 Edit 工具更新 task.md 文件中的任务复选框
@@ -141,4 +118,4 @@ digraph process {
 所有任务已完成并通过验证！可以使用 `/codespec/archive` 归档此变更。
 ```
 
-<!-- main-agent-development -->
+<!-- main-agent-driven -->

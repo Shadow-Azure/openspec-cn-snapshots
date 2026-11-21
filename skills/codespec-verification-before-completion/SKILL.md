@@ -1,6 +1,6 @@
 ---
-name: verification-before-completion
-description: verification-before-completion
+name: codespec-verification-before-completion
+description: codespec-verification-before-completion
 license: MIT
 compatibility: 无特殊依赖。
 metadata:

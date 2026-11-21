@@ -2,8 +2,9 @@
   "schemaVersion": 1,
   "source": {
     "repo": "https://github.com/chenmr0/OpenSpec-cn",
-    "branch": "0dad616410deecd5da728a8cad75596af2094dc0",
-    "commit": "0dad616410deecd5da728a8cad75596af2094dc0",
+    "ref": "a7ec2006c95fb53cebe7817dc2df656f4997a62b",
+    "branch": "main-copy-ar",
+    "commit": "a7ec2006c95fb53cebe7817dc2df656f4997a62b",
     "codespecVersion": "1.3.1",
     "node": "22",
     "pnpm": "10.34.9"
@@ -18,9 +19,9 @@
       "core",
       "--force"
     ],
-    "lockfileMode": "frozen",
-    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858969641",
-    "generatedAt": "2026-11-21T03:02:01.346Z"
+    "lockfileMode": "no-frozen",
+    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44859997421",
+    "generatedAt": "2026-11-21T03:13:57.260Z"
   },
   "artifacts": [
     {
@@ -46,10 +47,10 @@
     },
     {
       "type": "agent",
-      "name": "design-expand",
-      "path": "agents/design-expand/AGENT.md",
-      "sourcePath": ".claude/agents/design-expand.md",
-      "digest": "digest:600bd046d1f99203691e4cdad7bebd6264f63710bbfaa49e224454dd2f631a62"
+      "name": "concept-clarify",
+      "path": "agents/concept-clarify/AGENT.md",
+      "sourcePath": ".claude/agents/concept-clarify.md",
+      "digest": "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8"
     },
     {
       "type": "agent",
@@ -63,98 +64,70 @@
       "name": "opsx:apply",
       "path": "commands/opsx/apply.md",
       "sourcePath": ".claude/commands/opsx/apply.md",
-      "digest": "digest:50988b48ceddc540dbf6600af2f7b039ec23929251bd6b879a75d307eb01a34f"
+      "digest": "digest:dc1cd27b3bde716db19ebea52ac5fd89ed14f403c4d8940e9a830eca04bab18d"
     },
     {
       "type": "command",
       "name": "opsx:archive",
       "path": "commands/opsx/archive.md",
       "sourcePath": ".claude/commands/opsx/archive.md",
-      "digest": "digest:539785a1be9153ca99f611529f91c9bc8b442f2a3f9e42a45b5ec2b38799e1dc"
+      "digest": "digest:d4789c0ad45addcf8a7aaa3cac6f4aea83f582e2af65219bbb0ae76fb40adc43"
     },
     {
       "type": "command",
       "name": "opsx:design",
       "path": "commands/opsx/design.md",
       "sourcePath": ".claude/commands/opsx/design.md",
-      "digest": "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf"
+      "digest": "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478"
     },
     {
       "type": "command",
       "name": "opsx:propose",
       "path": "commands/opsx/propose.md",
       "sourcePath": ".claude/commands/opsx/propose.md",
-      "digest": "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc"
+      "digest": "digest:2ad2f9d5134575b601967d1f39be4b79959c51e6462d71b341fce55a5acb0a8e"
     },
     {
       "type": "skill",
-      "name": "codespec-apply-change",
-      "path": "skills/codespec-apply-change/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-apply-change/SKILL.md",
-      "digest": "digest:3c9939614e2442ec978bdd73c9d592a499d3c007b2c224beffb8bfade8b8eb19"
+      "name": "codespec-subagent-driven-development",
+      "path": "skills/codespec-subagent-driven-development/SKILL.md",
+      "sourcePath": ".claude/skills/codespec-subagent-driven-development/SKILL.md",
+      "digest": "digest:422aa583b5c148f9a2d40091825ad3a8d82f719b40865dfac95f7abe52b04c38"
     },
     {
       "type": "skill",
-      "name": "codespec-archive-change",
-      "path": "skills/codespec-archive-change/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-archive-change/SKILL.md",
-      "digest": "digest:99bac752a97472398d01490d4faffbcc86b3c8d7ae2027d66731b1c54c17350b"
+      "name": "codespec-test-driven-development",
+      "path": "skills/codespec-test-driven-development/SKILL.md",
+      "sourcePath": ".claude/skills/codespec-test-driven-development/SKILL.md",
+      "digest": "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407"
     },
     {
       "type": "skill",
-      "name": "codespec-propose",
-      "path": "skills/codespec-propose/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-propose/SKILL.md",
-      "digest": "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc"
-    },
-    {
-      "type": "skill",
-      "name": "design",
-      "path": "skills/design/SKILL.md",
-      "sourcePath": ".claude/skills/design/SKILL.md",
-      "digest": "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf"
+      "name": "codespec-verification-before-completion",
+      "path": "skills/codespec-verification-before-completion/SKILL.md",
+      "sourcePath": ".claude/skills/codespec-verification-before-completion/SKILL.md",
+      "digest": "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c"
     },
     {
       "type": "skill",
       "name": "main-agent-development",
       "path": "skills/main-agent-development/SKILL.md",
       "sourcePath": ".claude/skills/main-agent-development/SKILL.md",
-      "digest": "digest:f3c07d59eb52d1a4d2f6445d6e154aabae1385bd69aaa557100620e34e4b206d"
-    },
-    {
-      "type": "skill",
-      "name": "subagent-driven-development",
-      "path": "skills/subagent-driven-development/SKILL.md",
-      "sourcePath": ".claude/skills/subagent-driven-development/SKILL.md",
-      "digest": "digest:c0304ef30a270e77ca6c54bd4dc504c7e794762031263c0b5cc55c4452db0a45"
-    },
-    {
-      "type": "skill",
-      "name": "test-driven-development",
-      "path": "skills/test-driven-development/SKILL.md",
-      "sourcePath": ".claude/skills/test-driven-development/SKILL.md",
-      "digest": "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407"
-    },
-    {
-      "type": "skill",
-      "name": "verification-before-completion",
-      "path": "skills/verification-before-completion/SKILL.md",
-      "sourcePath": ".claude/skills/verification-before-completion/SKILL.md",
-      "digest": "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c"
+      "digest": "digest:783675afb4ed452a4599bb2a7c8d99480c19d7a3fdd7629cc266f60a9017e523"
     },
     {
       "type": "skill",
       "name": "writing-plans-main",
       "path": "skills/writing-plans-main/SKILL.md",
       "sourcePath": ".claude/skills/writing-plans-main/SKILL.md",
-      "digest": "digest:43ba41a8eadbbd823f1bed32d24fd0334813d6e3e99f808f49e09cde33ee550c"
+      "digest": "digest:52a6b9e478982702f96ed9b0b6e8a3db8a4c60d97d16289fee14475790449821"
     },
     {
       "type": "skill",
       "name": "writing-plans-subagent",
       "path": "skills/writing-plans-subagent/SKILL.md",
       "sourcePath": ".claude/skills/writing-plans-subagent/SKILL.md",
-      "digest": "digest:4973093a8aa74216141b8b38cbfc00faecd5cd142a203d5f0e6ab093a0d2ce84"
+      "digest": "digest:6ac475a9f4ab3aa80ce47ea1991d27dd661732593ebdbd5ad92368cbb27120d4"
     }
   ]
 }
