@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "source": {
     "repo": "https://github.com/chenmr0/OpenSpec-cn",
-    "ref": "0dad616410deecd5da728a8cad75596af2094dc0",
-    "branch": "main-copy-ar-design",
-    "commit": "0dad616410deecd5da728a8cad75596af2094dc0",
+    "ref": "e55a5e28a38e4ee483ac34220847b388f9850214",
+    "branch": "main-copy-ar-copy",
+    "commit": "e55a5e28a38e4ee483ac34220847b388f9850214",
     "codespecVersion": "1.3.1",
     "node": "22",
     "pnpm": "10.34.9"
@@ -19,9 +19,9 @@
       "core",
       "--force"
     ],
-    "lockfileMode": "frozen",
-    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44860036830",
-    "generatedAt": "2026-11-21T03:14:21.346Z"
+    "lockfileMode": "no-frozen",
+    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44860027562",
+    "generatedAt": "2026-11-21T03:14:23.408Z"
   },
   "artifacts": [
     {
@@ -47,10 +47,10 @@
     },
     {
       "type": "agent",
-      "name": "design-expand",
-      "path": "agents/design-expand/AGENT.md",
-      "sourcePath": ".claude/agents/design-expand.md",
-      "digest": "digest:600bd046d1f99203691e4cdad7bebd6264f63710bbfaa49e224454dd2f631a62"
+      "name": "concept-clarify",
+      "path": "agents/concept-clarify/AGENT.md",
+      "sourcePath": ".claude/agents/concept-clarify.md",
+      "digest": "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8"
     },
     {
       "type": "agent",
@@ -78,56 +78,28 @@
       "name": "opsx:design",
       "path": "commands/opsx/design.md",
       "sourcePath": ".claude/commands/opsx/design.md",
-      "digest": "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf"
+      "digest": "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478"
     },
     {
       "type": "command",
       "name": "opsx:propose",
       "path": "commands/opsx/propose.md",
       "sourcePath": ".claude/commands/opsx/propose.md",
-      "digest": "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc"
-    },
-    {
-      "type": "skill",
-      "name": "codespec-apply-change",
-      "path": "skills/codespec-apply-change/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-apply-change/SKILL.md",
-      "digest": "digest:3c9939614e2442ec978bdd73c9d592a499d3c007b2c224beffb8bfade8b8eb19"
-    },
-    {
-      "type": "skill",
-      "name": "codespec-archive-change",
-      "path": "skills/codespec-archive-change/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-archive-change/SKILL.md",
-      "digest": "digest:99bac752a97472398d01490d4faffbcc86b3c8d7ae2027d66731b1c54c17350b"
-    },
-    {
-      "type": "skill",
-      "name": "codespec-propose",
-      "path": "skills/codespec-propose/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-propose/SKILL.md",
-      "digest": "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc"
-    },
-    {
-      "type": "skill",
-      "name": "design",
-      "path": "skills/design/SKILL.md",
-      "sourcePath": ".claude/skills/design/SKILL.md",
-      "digest": "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf"
+      "digest": "digest:207859c1b7679fc6ec86d95dce5ad1e045faff620a64e521d5a6d7fae628e7ab"
     },
     {
       "type": "skill",
       "name": "main-agent-development",
       "path": "skills/main-agent-development/SKILL.md",
       "sourcePath": ".claude/skills/main-agent-development/SKILL.md",
-      "digest": "digest:f3c07d59eb52d1a4d2f6445d6e154aabae1385bd69aaa557100620e34e4b206d"
+      "digest": "digest:45efc2e83c6da16b2cd2026ace623721559ebb65aa864e2e22cfd56ba85456d5"
     },
     {
       "type": "skill",
       "name": "subagent-driven-development",
       "path": "skills/subagent-driven-development/SKILL.md",
       "sourcePath": ".claude/skills/subagent-driven-development/SKILL.md",
-      "digest": "digest:c0304ef30a270e77ca6c54bd4dc504c7e794762031263c0b5cc55c4452db0a45"
+      "digest": "digest:8fee02d1160a18e77cffa8e49dc70a33461ea0017e0d19da5af16d0cda71ea4c"
     },
     {
       "type": "skill",

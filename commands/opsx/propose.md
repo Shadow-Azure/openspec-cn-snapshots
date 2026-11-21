@@ -31,9 +31,11 @@ tags: [workflow, artifacts, brainstorming]
 
 ## 流程详述
 
-**输入**：用户的请求应包含变更名称（kebab-case）或对他们想要构建内容的描述。
+**输入与续接模式判定**：用户的请求应包含变更名称（kebab-case）或对他们想要构建内容的描述。
 
-**如果没有提供明确的输入，询问他们想要构建什么**
+   先判断输入是否是 kebab-case 变更名称，并检查 `codespec/changes/<name>/` 是否已经存在。
+
+   **如果没有提供明确的输入，询问他们想要构建什么**
 
    使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
    > "您想要处理什么变更？请描述您想要构建或修复的内容。"
@@ -42,7 +44,15 @@ tags: [workflow, artifacts, brainstorming]
 
    **重要提示**：在不了解用户想要构建什么的情况下，请勿继续。
 
-**创建变更目录**
+**已有变更续接模式（/codespec/plan <name>）**
+
+   如果 `codespec/changes/<name>/` 已存在，进入已有变更续接模式。已有变更目录存在时禁止创建同名新变更，不要重新运行 `codespec new change "<name>"`。
+
+   如果 `codespec/changes/<name>/ar.md` 存在，必须先读取 `ar.md`，并把它作为上游需求来源；不要要求用户重复描述需求。
+   
+**新变更创建模式**
+
+   如果 `codespec/changes/<name>/` 不存在，则创建变更目录：
    ```bash
    codespec new change "<name>"
    ```
@@ -129,7 +139,7 @@ tags: [workflow, artifacts, brainstorming]
 
    发现问题时直接内联修复。无需重新审查——修好继续推进。
 
-   d. **用户审查 spec.md：**
+   d. **用户审查 spec.md（必须形成"审查 → 修改 → 再审查"循环，直到用户明确批准）：**
    自检完成后，请用户在继续之前审查规格文档：
    > "规范文档已写入 `spec.md`。请审查一下，如果在我们继续编写设计文档之前你想做任何修改，请告诉我。"
    使用 **AskUserQuestion tool** 等待用户回复，选项包含"批准","需要修改","我已手动修改"。只有在用户批准后才继续。如果用户手动修改了文件，请读取最新的文件后继续。
@@ -154,7 +164,7 @@ tags: [workflow, artifacts, brainstorming]
 
    发现问题时直接内联修复。无需重新审查——修好继续推进。
 
-   d. **用户审查 design.md：**
+   d. **用户审查 design.md（必须形成"审查 → 修改 → 再审查"循环，直到用户明确批准）：**
    设计自检完成后，请用户在继续之前审查书面设计：
    > "设计文档已写入 `design.md`。请审查一下，如果在我们开始编写实现计划之前你想做任何修改，请告诉我。"
    使用 **AskUserQuestion tool** 等待用户回复，选项包含"批准","需要修改","我已手动修改"。只有在用户批准后才继续。如果用户手动修改了文件，请读取最新的文件后继续。
@@ -183,7 +193,7 @@ tags: [workflow, artifacts, brainstorming]
 
        **任务保存位置：** `codespec/changes/<name>/task.md`
 
-    b. **用户审查关卡**：
+    b. **用户审查关卡（必须形成"审查 → 修改 → 再审查"循环，直到用户明确批准）：**
    计划自检完成后，请用户在继续之前审查任务计划：
    > "任务文档已写入 `task.md`。请审查一下，如果你想做任何修改，请告诉我。"
    使用 **AskUserQuestion tool** 等待用户回复。如果他们要求修改，做出修改并重新运行计划自检。只有在用户批准后才继续。
@@ -215,5 +225,6 @@ tags: [workflow, artifacts, brainstorming]
 - **严格遵循 YAGNI** — 从所有设计中移除不必要的功能
 - **探索替代方案** — 在做决定之前始终提出 2-3 种方案
 - **保持灵活** — 有不明确的地方就回头澄清
+- 每次spec.md、design.md、task.md修改后都必须重新走一次审查关卡，循环往复，直到用户明确选择`批准`。**禁止把`已修改`等同于`已批准`而直接推进到下一步。**
 
 <!-- command: codespec-propose -->
