@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "source": {
     "repo": "https://github.com/chenmr0/OpenSpec-cn",
-    "branch": "e55a5e28a38e4ee483ac34220847b388f9850214",
-    "commit": "e55a5e28a38e4ee483ac34220847b388f9850214",
+    "branch": "ab27d81f0e64dca2fcf73c18e255ec6a759eb1a7",
+    "commit": "ab27d81f0e64dca2fcf73c18e255ec6a759eb1a7",
     "codespecVersion": "1.3.1",
     "node": "22",
     "pnpm": "10.34.9"
@@ -19,8 +19,8 @@
       "--force"
     ],
     "lockfileMode": "no-frozen",
-    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858959711",
-    "generatedAt": "2026-11-21T03:01:56.808Z"
+    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858949182",
+    "generatedAt": "2026-11-21T03:01:58.864Z"
   },
   "artifacts": [
     {
@@ -46,13 +46,6 @@
     },
     {
       "type": "agent",
-      "name": "concept-clarify",
-      "path": "agents/concept-clarify/AGENT.md",
-      "sourcePath": ".claude/agents/concept-clarify.md",
-      "digest": "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8"
-    },
-    {
-      "type": "agent",
       "name": "spec-reviewer",
       "path": "agents/spec-reviewer/AGENT.md",
       "sourcePath": ".claude/agents/spec-reviewer.md",
@@ -74,17 +67,10 @@
     },
     {
       "type": "command",
-      "name": "opsx:design",
-      "path": "commands/opsx/design.md",
-      "sourcePath": ".claude/commands/opsx/design.md",
-      "digest": "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478"
-    },
-    {
-      "type": "command",
       "name": "opsx:propose",
       "path": "commands/opsx/propose.md",
       "sourcePath": ".claude/commands/opsx/propose.md",
-      "digest": "digest:207859c1b7679fc6ec86d95dce5ad1e045faff620a64e521d5a6d7fae628e7ab"
+      "digest": "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc"
     },
     {
       "type": "skill",
@@ -98,7 +84,7 @@
       "name": "subagent-driven-development",
       "path": "skills/subagent-driven-development/SKILL.md",
       "sourcePath": ".claude/skills/subagent-driven-development/SKILL.md",
-      "digest": "digest:8fee02d1160a18e77cffa8e49dc70a33461ea0017e0d19da5af16d0cda71ea4c"
+      "digest": "digest:c0304ef30a270e77ca6c54bd4dc504c7e794762031263c0b5cc55c4452db0a45"
     },
     {
       "type": "skill",
