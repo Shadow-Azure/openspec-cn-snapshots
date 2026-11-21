@@ -29,38 +29,47 @@ digraph process {
         "实现子智能体有疑问?" [shape=diamond];
         "回答问题，提供上下文" [shape=box];
         "实现子智能体实现、测试、提交、自审" [shape=box];
-        "分派规格审查子智能体 (./spec-reviewer-prompt.md)" [shape=box];
+        "分派规格审查子智能体 (spec-reviewer)" [shape=box];
         "规格审查子智能体确认代码匹配规格?" [shape=diamond];
         "实现子智能体修复规格差距" [shape=box];
-        "分派代码质量审查子智能体 (./code-quality-reviewer-prompt.md)" [shape=box];
+        "分派代码质量审查子智能体 (code-quality-reviewer)" [shape=box];
         "代码质量审查子智能体通过?" [shape=diamond];
         "实现子智能体修复质量问题" [shape=box];
-        "在 TodoWrite 中标记任务完成" [shape=box];
+        "在 TodoWrite 中标记任务完成，更新 task.md 复选框 [ ] → [x]" [shape=box];
     }
 
     "读取计划，提取所有任务的完整文本，记录上下文，创建 TodoWrite" [shape=box];
     "还有剩余任务?" [shape=diamond];
     "分派最终代码审查子智能体审查整体实现" [shape=box];
-    "报告完成，验证测试通过，等待用户指示" [shape=box style=filled fillcolor=lightgreen];
+    "委派 change-verifier 变更级验证" [shape=box];
+    "验证通过?" [shape=diamond];
+    "修复循环（最多3次）" [shape=box];
+    "报告完成，验证测试通过" [shape=box style=filled fillcolor=lightgreen];
+    "报告暂停——需要人工介入" [shape=box style=filled fillcolor=orange];
 
     "读取计划，提取所有任务的完整文本，记录上下文，创建 TodoWrite" -> "分派实现子智能体 (code-generator)";
     "分派实现子智能体 (code-generator)" -> "实现子智能体有疑问?";
     "实现子智能体(code-generator)有疑问?" -> "回答问题，提供上下文" [label="是"];
     "回答问题，提供上下文" -> "分派实现子智能体 (code-generator)";
     "实现子智能体有疑问?" -> "实现子智能体实现、测试、提交、自审" [label="否"];
-    "实现子智能体实现、测试、提交、自审" -> "分派规格审查子智能体 (./spec-reviewer-prompt.md)";
-    "分派规格审查子智能体 (./spec-reviewer-prompt.md)" -> "规格审查子智能体确认代码匹配规格?";
+    "实现子智能体实现、测试、提交、自审" -> "分派规格审查子智能体 (spec-reviewer)";
+    "分派规格审查子智能体 (spec-reviewer)" -> "规格审查子智能体确认代码匹配规格?";
     "规格审查子智能体确认代码匹配规格?" -> "实现子智能体修复规格差距" [label="否"];
-    "实现子智能体修复规格差距" -> "分派规格审查子智能体 (./spec-reviewer-prompt.md)" [label="重新审查"];
-    "规格审查子智能体确认代码匹配规格?" -> "分派代码质量审查子智能体 (./code-quality-reviewer-prompt.md)" [label="是"];
-    "分派代码质量审查子智能体 (./code-quality-reviewer-prompt.md)" -> "代码质量审查子智能体通过?";
+    "实现子智能体修复规格差距" -> "分派规格审查子智能体 (spec-reviewer)" [label="重新审查"];
+    "规格审查子智能体确认代码匹配规格?" -> "分派代码质量审查子智能体 (code-quality-reviewer)" [label="是"];
+    "分派代码质量审查子智能体 (code-quality-reviewer)" -> "代码质量审查子智能体通过?";
     "代码质量审查子智能体通过?" -> "实现子智能体修复质量问题" [label="否"];
-    "实现子智能体修复质量问题" -> "分派代码质量审查子智能体 (./code-quality-reviewer-prompt.md)" [label="重新审查"];
-    "代码质量审查子智能体通过?" -> "在 TodoWrite 中标记任务完成" [label="是"];
-    "在 TodoWrite 中标记任务完成" -> "还有剩余任务?";
+    "实现子智能体修复质量问题" -> "分派代码质量审查子智能体 (code-quality-reviewer)" [label="重新审查"];
+    "代码质量审查子智能体通过?" -> "在 TodoWrite 中标记任务完成，更新 task.md 复选框 [ ] → [x]" [label="是"];
+    "在 TodoWrite 中标记任务完成，更新 task.md 复选框 [ ] → [x]" -> "还有剩余任务?";
     "还有剩余任务?" -> "分派实现子智能体 (code-generator)" [label="是"];
     "还有剩余任务?" -> "分派最终代码审查子智能体审查整体实现" [label="否"];
-    "分派最终代码审查子智能体审查整体实现" -> "报告完成，验证测试通过，等待用户指示";
+    "分派最终代码审查子智能体审查整体实现" -> "委派 change-verifier 变更级验证";
+    "委派 change-verifier 变更级验证" -> "验证通过?";
+    "验证通过?" -> "修复循环（最多3次）" [label="否"];
+    "修复循环（最多3次）" -> "委派 change-verifier 变更级验证" [label="重新验证"];
+    "验证通过?" -> "报告完成，验证测试通过" [label="是"];
+    "修复循环（最多3次）" -> "报告暂停——需要人工介入" [label="超过3次"];
 }
 ```
 
@@ -82,18 +91,12 @@ digraph process {
 
 **绝不** 忽略上报或在不做任何更改的情况下让同一模型重试。如果实现者说卡住了，说明有什么东西需要改变。
 
-## 提示词模板
-
-- `code-generator` - 分派实现子智能体
-- `./spec-reviewer-prompt.md` - 分派规格合规审查子智能体
-- `./code-quality-reviewer-prompt.md` - 分派代码质量审查子智能体
-
 ## 示例工作流
 
 ```
 你：我正在使用子智能体驱动开发来执行这个计划。
 
-[一次性读取计划文件：plan.md]
+[一次性读取任务文件：task.md]
 [提取全部 5 个任务的完整文本和上下文]
 [用所有任务创建 TodoWrite]
 
@@ -119,7 +122,7 @@ digraph process {
 [获取 git SHA，分派代码质量审查]
 代码审查者：优点：测试覆盖好，代码整洁。问题：无。通过。
 
-[标记任务 1 完成]
+[标记任务 1 完成，更新 task.md 中 ### [ ] → ### [x]]
 
 任务 2：恢复模式
 
@@ -153,7 +156,7 @@ digraph process {
 [代码审查者再次审查]
 代码审查者：✅ 通过
 
-[标记任务 2 完成]
+[标记任务 2 完成，更新 task.md 中 ### [ ] → ### [x]]
 
 ...
 
@@ -225,3 +228,84 @@ digraph process {
 **子智能体步骤执行纪律：**
 - **严格按步骤顺序** - 实现者子智能体必须严格按计划中的步骤顺序执行，不合并、不跳过、不重排
 - **TDD 由计划驱动** - 如果计划中某个任务的步骤要求先写测试再写实现，子智能体必须遵循该顺序。TDD 的可靠性取决于计划中是否包含完整的 TDD 步骤
+
+## 变更级验证
+
+所有任务完成后，必须执行变更级验证：
+
+**获取应用指令**
+   ```bash
+   codespec instructions apply --change "<name>" --json
+   ```
+   这返回：
+   - `contextFiles`：产出物 ID -> 具体文件路径数组（因 Schema 而异）
+   - 进度（总计、完成、剩余）
+   - 带有状态的任务列表
+   - 基于当前状态的动态指令
+
+**处理状态：**
+   - 如果 `state: "blocked"`（缺少产出物）：显示消息
+   - 如果 `state: "all_done"`：祝贺，建议归档
+   - 否则：继续实现
+
+**委派验证给专用验证子智能体（change-verifier）**
+
+   所有任务完成后，**不要在主上下文中执行验证**。必须委派给专用的 `change-verifier` 子智能体：
+
+   使用 Agent tool（subagent_type: "change-verifier"）：
+
+   ```
+   description: "变更级验证：<change-name>"
+   prompt: |
+     你正在执行变更级验证门控。
+
+     ## 工作目录
+     <当前项目的工作目录>
+
+     严格按照你的验证流程执行：确定命令 → 运行构建 → 运行测试 → 判定结果。
+   ```
+
+   失败时执行修复循环（最多 3 次）。
+
+## 完成时的输出
+
+```
+## 实现完成
+
+**变更：** <change-name>
+**Schema：** <schema-name>
+**执行模式：** subagent
+**进度：** 7/7 任务已完成 ✓
+
+### 变更级验证
+- **构建：** `npm run build` → exit 0 ✅
+- **测试：** `npm test` → 34/34 pass ✅
+
+### 本次会话已完成
+- [x] 任务 3：<description>
+- [x] 任务 4：<description>
+...
+
+所有任务已完成并通过验证！可以使用 `/codespec/archive` 归档此变更。
+```
+
+## 暂停时的输出（仅在反复自主修复仍无法通过时）
+
+```
+## 实现暂停——需要人工介入
+
+**变更：** <change-name>
+**Schema：** <schema-name>
+**执行模式：** subagent
+**进度：** 4/7 任务已完成
+
+### 已自主尝试的解决措施
+1. <尝试 1：例如，换更强模型重新分派>
+2. <尝试 2：例如，拆分任务后重新分派>
+
+### 仍无法解决的问题
+任务 5：<具体阻塞原因>
+
+**已完成任务：**
+- [x] 任务 1-4
+```
