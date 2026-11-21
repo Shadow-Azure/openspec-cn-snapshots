@@ -1,13 +1,83 @@
 {
-  "schemaVersion": 1,
-  "notes": [
-    "variants[\"<tool>/<profile>\"][<objectName>] = 该变体下该对象的已知正确 digest（digest:<64hex>）。",
-    "codespec-subagent-driven-development 的 422aa… 来自生产轨迹的目标值；本仓已用源 commit a7ec200 + claude/core 本地复现命中（2026-11-20，codespec 1.3.1 / node 24 / pnpm 10.33.0）。",
-    "生成结果与 lock 不一致时 verify.mjs 失败并输出 diff，不打 tag；先核对 tool/profile/config/版本，确认生成环境正确后再更新 lock。"
-  ],
-  "variants": {
-    "claude/core": {
-      "codespec-subagent-driven-development": "digest:422aa583b5c148f9a2d40091825ad3a8d82f719b40865dfac95f7abe52b04c38"
-    }
-  }
+    "schemaVersion":  2,
+    "notes":  [
+                  "variants[\"<tool>/<profile>\"].commits[<短commit>][<objectName>] = 该 commit 下该对象的已知正确 digest（digest:<64hex>）。",
+                  "策略（2026-11-21 确认）：新 commit 首次构建无 lock 记录 → 警告并放行（tag 忠实记录实际内容）；同一 commit 再次构建 → 强制比对，防环境漂移。",
+                  "a7ec200 的 422aa… 是生产轨迹锚点（codespec-subagent-driven-development），必须始终保留且不可改动。",
+                  "落锁方式：人工编辑本文件，或用成功 run 上传的 manifest artifact 代为生成。"
+              ],
+    "variants":  {
+                     "claude/core":  {
+                                         "commits":  {
+                                                         "a7ec200":  {
+                                                                         "codespec-subagent-driven-development":  "digest:422aa583b5c148f9a2d40091825ad3a8d82f719b40865dfac95f7abe52b04c38"
+                                                                     },
+                                                         "31cda2f":  {
+                                                                         "code-generator":  "digest:92d22df7c5c2e703c1df793d07b28354d26eed60372d26b2a5713f8950d7d8d7",
+                                                                         "code-reviewer":  "digest:25430468bb20141a52241fbcb83ab1f7bd6927ba4bbc5083bb80850caaa25ef7",
+                                                                         "opsx:apply":  "digest:270970bd7feeb189a9a57fb441aa8ccb8535521babe32641a64cc7d0dee260a9",
+                                                                         "opsx:archive":  "digest:f0ef030cbea9f74ed15055f3916e9fddf5057551aaf713a5c8957ad505a875d7",
+                                                                         "opsx:explore":  "digest:45f76df0b907946adc6c297b3c2cb50ceb135211605735c3abd930c1b6a36d9f",
+                                                                         "opsx:propose":  "digest:06d41905d5f2bf4ccf2de7f807b0599738cabcc7c2bba3bb6ba95e15d1bc07f2",
+                                                                         "subagent-driven-development":  "digest:025c3a4b4e622d6c91f5bddd3cfd023c2a96e5a623c1e1d778d8c6a9a01f1b3f",
+                                                                         "test-driven-development":  "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407",
+                                                                         "verification-before-completion":  "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c",
+                                                                         "writing-plans":  "digest:841e420c5a57fa6d1acc70ef2f4282ad24645b9e7803c7c229fbe868e0421e28"
+                                                                     },
+                                                         "ab27d81":  {
+                                                                         "change-verifier":  "digest:a750620fb63ef6a0d525b549146ecfec2de4d8026e90da81f78ea6af0e39401b",
+                                                                         "code-generator":  "digest:c816a39ed560a05402b8a1eb2ffdb935d8074101e3aba3f6dc19c545820e83f9",
+                                                                         "code-quality-reviewer":  "digest:3742e03fe7d021f9dfc4c512004e8c0a0fdbd4a5c909ce95d122464cce919d41",
+                                                                         "spec-reviewer":  "digest:86b6567b1533862bc8a968e57653d5119146283e5d25e11566fd262d088a2ea6",
+                                                                         "opsx:apply":  "digest:50988b48ceddc540dbf6600af2f7b039ec23929251bd6b879a75d307eb01a34f",
+                                                                         "opsx:archive":  "digest:539785a1be9153ca99f611529f91c9bc8b442f2a3f9e42a45b5ec2b38799e1dc",
+                                                                         "opsx:propose":  "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc",
+                                                                         "main-agent-development":  "digest:45efc2e83c6da16b2cd2026ace623721559ebb65aa864e2e22cfd56ba85456d5",
+                                                                         "subagent-driven-development":  "digest:c0304ef30a270e77ca6c54bd4dc504c7e794762031263c0b5cc55c4452db0a45",
+                                                                         "test-driven-development":  "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407",
+                                                                         "verification-before-completion":  "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c",
+                                                                         "writing-plans-main":  "digest:43ba41a8eadbbd823f1bed32d24fd0334813d6e3e99f808f49e09cde33ee550c",
+                                                                         "writing-plans-subagent":  "digest:4973093a8aa74216141b8b38cbfc00faecd5cd142a203d5f0e6ab093a0d2ce84"
+                                                                     },
+                                                         "e55a5e2":  {
+                                                                         "change-verifier":  "digest:a750620fb63ef6a0d525b549146ecfec2de4d8026e90da81f78ea6af0e39401b",
+                                                                         "code-generator":  "digest:c816a39ed560a05402b8a1eb2ffdb935d8074101e3aba3f6dc19c545820e83f9",
+                                                                         "code-quality-reviewer":  "digest:3742e03fe7d021f9dfc4c512004e8c0a0fdbd4a5c909ce95d122464cce919d41",
+                                                                         "concept-clarify":  "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8",
+                                                                         "spec-reviewer":  "digest:86b6567b1533862bc8a968e57653d5119146283e5d25e11566fd262d088a2ea6",
+                                                                         "opsx:apply":  "digest:50988b48ceddc540dbf6600af2f7b039ec23929251bd6b879a75d307eb01a34f",
+                                                                         "opsx:archive":  "digest:539785a1be9153ca99f611529f91c9bc8b442f2a3f9e42a45b5ec2b38799e1dc",
+                                                                         "opsx:design":  "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478",
+                                                                         "opsx:propose":  "digest:207859c1b7679fc6ec86d95dce5ad1e045faff620a64e521d5a6d7fae628e7ab",
+                                                                         "main-agent-development":  "digest:45efc2e83c6da16b2cd2026ace623721559ebb65aa864e2e22cfd56ba85456d5",
+                                                                         "subagent-driven-development":  "digest:8fee02d1160a18e77cffa8e49dc70a33461ea0017e0d19da5af16d0cda71ea4c",
+                                                                         "test-driven-development":  "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407",
+                                                                         "verification-before-completion":  "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c",
+                                                                         "writing-plans-main":  "digest:43ba41a8eadbbd823f1bed32d24fd0334813d6e3e99f808f49e09cde33ee550c",
+                                                                         "writing-plans-subagent":  "digest:4973093a8aa74216141b8b38cbfc00faecd5cd142a203d5f0e6ab093a0d2ce84"
+                                                                     },
+                                                         "0dad616":  {
+                                                                         "change-verifier":  "digest:a750620fb63ef6a0d525b549146ecfec2de4d8026e90da81f78ea6af0e39401b",
+                                                                         "code-generator":  "digest:c816a39ed560a05402b8a1eb2ffdb935d8074101e3aba3f6dc19c545820e83f9",
+                                                                         "code-quality-reviewer":  "digest:3742e03fe7d021f9dfc4c512004e8c0a0fdbd4a5c909ce95d122464cce919d41",
+                                                                         "design-expand":  "digest:600bd046d1f99203691e4cdad7bebd6264f63710bbfaa49e224454dd2f631a62",
+                                                                         "spec-reviewer":  "digest:86b6567b1533862bc8a968e57653d5119146283e5d25e11566fd262d088a2ea6",
+                                                                         "opsx:apply":  "digest:50988b48ceddc540dbf6600af2f7b039ec23929251bd6b879a75d307eb01a34f",
+                                                                         "opsx:archive":  "digest:539785a1be9153ca99f611529f91c9bc8b442f2a3f9e42a45b5ec2b38799e1dc",
+                                                                         "opsx:design":  "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf",
+                                                                         "opsx:propose":  "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc",
+                                                                         "codespec-apply-change":  "digest:3c9939614e2442ec978bdd73c9d592a499d3c007b2c224beffb8bfade8b8eb19",
+                                                                         "codespec-archive-change":  "digest:99bac752a97472398d01490d4faffbcc86b3c8d7ae2027d66731b1c54c17350b",
+                                                                         "codespec-propose":  "digest:df2ce0f8517a10ac84506cb5a6915dbf9e7bce6525b8a51913bcacb7235e38fc",
+                                                                         "design":  "digest:ec4e02534b62820fc73c7c091a7aeeb131bee18254358a8ff53a03ae6a2d45cf",
+                                                                         "main-agent-development":  "digest:f3c07d59eb52d1a4d2f6445d6e154aabae1385bd69aaa557100620e34e4b206d",
+                                                                         "subagent-driven-development":  "digest:c0304ef30a270e77ca6c54bd4dc504c7e794762031263c0b5cc55c4452db0a45",
+                                                                         "test-driven-development":  "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407",
+                                                                         "verification-before-completion":  "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c",
+                                                                         "writing-plans-main":  "digest:43ba41a8eadbbd823f1bed32d24fd0334813d6e3e99f808f49e09cde33ee550c",
+                                                                         "writing-plans-subagent":  "digest:4973093a8aa74216141b8b38cbfc00faecd5cd142a203d5f0e6ab093a0d2ce84"
+                                                                     }
+                                                     }
+                                     }
+                 }
 }

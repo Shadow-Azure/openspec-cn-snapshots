@@ -33,23 +33,26 @@ jobs:
       - name: digest 单元测试（含 superpowers 真实向量）
         run: node --test
 
-      - name: digests.lock.json 格式校验
+      - name: digests.lock.json 格式校验（v2：按 commit 分组）
         run: |
           node -e '
             const l = require("./digests.lock.json");
-            if (l.schemaVersion !== 1) { console.error("schemaVersion 必须 = 1"); process.exit(1); }
+            if (l.schemaVersion !== 2) { console.error("schemaVersion 必须 = 2"); process.exit(1); }
             if (!l.variants || typeof l.variants !== "object") { console.error("缺少 variants"); process.exit(1); }
             let n = 0;
             for (const [variant, group] of Object.entries(l.variants)) {
-              for (const [name, digest] of Object.entries(group)) {
-                if (!/^digest:[0-9a-f]{64}$/.test(digest)) {
-                  console.error(`非法 digest: ${variant}/${name} = ${digest}`);
-                  process.exit(1);
+              const commits = group.commits ?? { "(legacy)": group };
+              for (const [commit, entries] of Object.entries(commits)) {
+                for (const [name, digest] of Object.entries(entries)) {
+                  if (!/^digest:[0-9a-f]{64}$/.test(digest)) {
+                    console.error(`非法 digest: ${variant}/${commit}/${name} = ${digest}`);
+                    process.exit(1);
+                  }
+                  n++;
                 }
-                n++;
               }
             }
-            console.log(`lock OK: ${n} 条锁定`);
+            console.log(`lock OK (v2): ${n} 条锁定`);
           '
 
       - name: 冒烟：materialize + verify + scan（合成 fixture）

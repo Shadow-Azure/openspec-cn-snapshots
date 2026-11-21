@@ -90,7 +90,11 @@ function main() {
   }
 
   // 2) 内容一致性：磁盘文件重新计算的 digest 必须等于 manifest 记录
-  if (manifest && Array.isArray(manifest.artifacts) && !problems.some((p) => p.startsWith("manifest"))) {
+  //    （--skip-integrity：只有 manifest、没有产物文件的离线校验场景，如排查 artifact）
+  const skipIntegrity = args["skip-integrity"] === true;
+  if (skipIntegrity) {
+    warnings.push("已跳过磁盘完整性检查（--skip-integrity）");
+  } else if (manifest && Array.isArray(manifest.artifacts) && !problems.some((p) => p.startsWith("manifest"))) {
     for (const a of manifest.artifacts) {
       const p = join(base, a.path);
       if (!existsSync(p)) {
@@ -104,9 +108,12 @@ function main() {
     }
   }
 
-  // 3a) digests.lock.json 比对（按 variant 分组；lock 是"已知正确值"，不一致即失败）
+  // 3a) digests.lock.json 比对（v2：variants[tool/profile].commits[短commit][object]）
+  //     策略（2026-11-21 确认）：
+  //       - manifest 对应 commit 在 lock 中有记录 → 逐条强制比对，不一致即失败（防同 commit 构建漂移）
+  //       - 无记录 → 警告并放行（新版本首建：tag 忠实记录本次实际内容）
+  //       - 兼容 v1（无 commits 层）：视为适用于任意 commit 的全局锁定（已废弃格式，请迁移）
   const lockPath = args.lock && args.lock !== true ? resolve(args.lock) : join(repoRoot, "digests.lock.json");
-  let locked = {};
   if (existsSync(lockPath)) {
     try {
       const lock = JSON.parse(readFileSync(lockPath, "utf8"));
@@ -118,18 +125,39 @@ function main() {
       if (group == null) {
         warnings.push(`digests.lock 中没有 variant "${variant}" 的分组，跳过 lock 比对`);
       } else {
-        locked = group;
-        const byName = new Map((manifest?.artifacts ?? []).map((a) => [a.name, a]));
-        for (const [name, expected] of Object.entries(group)) {
-          const art = byName.get(name);
-          if (!art) {
-            fail(`lock 要求存在但本次未生成: ${name} (期望 ${expected})`);
-          } else if (art.digest !== expected) {
-            fail(`digest 与 lock 不一致: ${name}\n  lock:    ${expected}\n  actual:  ${art.digest}`);
-          }
+        const commit = String(manifest?.source?.commit ?? "");
+        const short = commit.slice(0, 7);
+        let locked = null;
+        let lockedLabel = null;
+        if (group.commits && typeof group.commits === "object") {
+          const keys = Object.keys(group.commits);
+          const exact = keys.find((k) => k === short) ?? keys.find((k) => commit.startsWith(k));
+          locked = exact ? group.commits[exact] : null;
+          lockedLabel = exact ? `commit ${exact}` : null;
+        } else {
+          locked = group;
+          lockedLabel = "legacy 全局锁定";
         }
-        for (const a of manifest?.artifacts ?? []) {
-          if (!(a.name in group)) warnings.push(`${a.name} 不在 lock 中（仅警告；如需钉住请更新 digests.lock.json）`);
+        if (locked == null) {
+          warnings.push(
+            `commit ${short || "(未知)"} 在 digests.lock 中没有记录：按“新版本放行”策略继续` +
+              `（tag 忠实记录本次实际内容；如需防漂移，请为该 commit 落锁）`,
+          );
+        } else {
+          const byName = new Map((manifest?.artifacts ?? []).map((a) => [a.name, a]));
+          for (const [name, expected] of Object.entries(locked)) {
+            const art = byName.get(name);
+            if (!art) {
+              fail(`lock 要求存在但本次未生成: ${name} (期望 ${expected})`);
+            } else if (art.digest !== expected) {
+              fail(`digest 与 lock 不一致: ${name}\n  lock:    ${expected}\n  actual:  ${art.digest}`);
+            }
+          }
+          for (const a of manifest?.artifacts ?? []) {
+            if (!(a.name in locked)) {
+              warnings.push(`${a.name} 不在 ${lockedLabel} 的 lock 中（仅警告；如需钉住请更新 digests.lock.json）`);
+            }
+          }
         }
       }
     } catch (err) {

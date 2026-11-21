@@ -109,11 +109,17 @@ manifest.json                     # 源信息 + 工具版本 + 每个产物的 d
 6 skills / 5 agents / 4 commands，`codespec-subagent-driven-development` digest 命中目标值
 （环境：codespec 1.3.1，node 24 / pnpm 10.33.0；产物为模板静态文本，与 node 小版本无关）。
 
-### digests.lock.json
+### digests.lock.json（v2：按 commit 分组）
 
-`variants["<tool>/<profile>"][<objectName>] = "digest:…"` 记录已知正确值。CI 生成后比对：
-不一致 → **失败并输出 diff，不打 tag**（防止生成环境漂移静默发版）。对象名称对不上时宁可先不配，不要猜——
-轨迹里的 `test-driven-development` 很可能来自 Superpowers，而不是本仓的 `codespec-test-driven-development`。
+`variants["<tool>/<profile>"].commits[<短commit>][<objectName>] = "digest:…"` 记录各 commit 的已知正确值：
+
+- **新 commit 首次构建**：无 lock 记录 → 警告并放行，tag 忠实记录实际内容（2026-11-21 确认的策略）。
+- **同一 commit 再次构建**：有记录 → 强制比对，不一致 **失败并输出 diff，不打 tag**（防生成环境漂移静默发版）。
+- **a7ec200 的 `422aa…`** 是生产轨迹锚点（`codespec-subagent-driven-development`），永久保留、不可改动。
+- 落锁方式：人工编辑，或用成功 run 上传的 manifest artifact 代为生成。
+
+对象名称对不上时宁可先不配，不要猜——轨迹里的 `test-driven-development` 可能来自 Superpowers，也可能是
+OpenSpec-cn 新一代产物（`codespec-*` 已改名），跨源同名只能靠 digest 区分。
 
 ## 平台接入
 
@@ -176,7 +182,8 @@ manifest.json                     # 源信息 + 工具版本 + 每个产物的 d
 2. config 变体（`-cfg<8hex>` tag 后缀）已预留命名规则，workflow 暂不注入自定义 config。
 3. 旧 tag 保留策略与仓库体积上限未定；当前只增不删。
 4. 同一 source_ref + tool + profile 重复运行会因 tag 已存在而幂等失败——这是特性，不是 bug。
-5. 触发方式：经确认（2026-11-20）**保持纯 `workflow_dispatch` 手动触发**，不自动跟踪上游更新——每个快照都是有意发布；换新 source_ref 时若 digest 与 lock 不一致，workflow 会失败并输出 diff，人工核对新产物并更新 `digests.lock.json` 后再正式发版。如需自动化，`schedule` / `repository_dispatch` 是预留扩展点。
+5. 触发方式：经确认（2026-11-20）**保持纯 `workflow_dispatch` 手动触发**，不自动跟踪上游更新——每个快照都是有意发布；如需自动化，`schedule` / `repository_dispatch` 是预留扩展点。
+6. lock 策略（2026-11-21 确认）：**按 commit 分组，新版本放行**——新 commit 首建无记录即放行（tag = 实际内容），同 commit 重建强制比对防漂移；a7ec200 轨迹锚点永久保留。注意：与 a7ec200 内容不同的 tag 无法与现有 39 条轨迹关联（轨迹锚定旧命名 `codespec-*`），仅作新一代产物的忠实记录。`main-copy-ar2`（06eaf76）上游分支自身编译损坏（`archive.ts` 引用缺失的 `git-auto-commit.js`），修复前无法快照。
 
 ## 文件地图
 
