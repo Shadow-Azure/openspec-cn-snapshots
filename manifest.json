@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "source": {
     "repo": "https://github.com/chenmr0/OpenSpec-cn",
-    "branch": "a7ec2006c95fb53cebe7817dc2df656f4997a62b",
-    "commit": "a7ec2006c95fb53cebe7817dc2df656f4997a62b",
+    "branch": "31cda2f8fddf6bc0a8a04405665317ae94a9efd8",
+    "commit": "31cda2f8fddf6bc0a8a04405665317ae94a9efd8",
     "codespecVersion": "1.3.1",
     "node": "22",
     "pnpm": "10.34.9"
@@ -18,115 +18,80 @@
       "core",
       "--force"
     ],
-    "lockfileMode": "no-frozen",
-    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44693608872",
-    "generatedAt": "2026-11-20T07:15:51.411Z"
+    "lockfileMode": "frozen",
+    "workflowRun": "https://github.com/Shadow-Azure/openspec-cn-snapshots/actions/runs/44858940217",
+    "generatedAt": "2026-11-21T03:01:42.434Z"
   },
   "artifacts": [
-    {
-      "type": "agent",
-      "name": "change-verifier",
-      "path": "agents/change-verifier/AGENT.md",
-      "sourcePath": ".claude/agents/change-verifier.md",
-      "digest": "digest:a750620fb63ef6a0d525b549146ecfec2de4d8026e90da81f78ea6af0e39401b"
-    },
     {
       "type": "agent",
       "name": "code-generator",
       "path": "agents/code-generator/AGENT.md",
       "sourcePath": ".claude/agents/code-generator.md",
-      "digest": "digest:c816a39ed560a05402b8a1eb2ffdb935d8074101e3aba3f6dc19c545820e83f9"
+      "digest": "digest:92d22df7c5c2e703c1df793d07b28354d26eed60372d26b2a5713f8950d7d8d7"
     },
     {
       "type": "agent",
-      "name": "code-quality-reviewer",
-      "path": "agents/code-quality-reviewer/AGENT.md",
-      "sourcePath": ".claude/agents/code-quality-reviewer.md",
-      "digest": "digest:3742e03fe7d021f9dfc4c512004e8c0a0fdbd4a5c909ce95d122464cce919d41"
-    },
-    {
-      "type": "agent",
-      "name": "concept-clarify",
-      "path": "agents/concept-clarify/AGENT.md",
-      "sourcePath": ".claude/agents/concept-clarify.md",
-      "digest": "digest:f8ae004a234dffa01a78cb158837bd28922d47d6869119d654f77e6b51f4cfe8"
-    },
-    {
-      "type": "agent",
-      "name": "spec-reviewer",
-      "path": "agents/spec-reviewer/AGENT.md",
-      "sourcePath": ".claude/agents/spec-reviewer.md",
-      "digest": "digest:86b6567b1533862bc8a968e57653d5119146283e5d25e11566fd262d088a2ea6"
+      "name": "code-reviewer",
+      "path": "agents/code-reviewer/AGENT.md",
+      "sourcePath": ".claude/agents/code-reviewer.md",
+      "digest": "digest:25430468bb20141a52241fbcb83ab1f7bd6927ba4bbc5083bb80850caaa25ef7"
     },
     {
       "type": "command",
       "name": "opsx:apply",
       "path": "commands/opsx/apply.md",
       "sourcePath": ".claude/commands/opsx/apply.md",
-      "digest": "digest:dc1cd27b3bde716db19ebea52ac5fd89ed14f403c4d8940e9a830eca04bab18d"
+      "digest": "digest:270970bd7feeb189a9a57fb441aa8ccb8535521babe32641a64cc7d0dee260a9"
     },
     {
       "type": "command",
       "name": "opsx:archive",
       "path": "commands/opsx/archive.md",
       "sourcePath": ".claude/commands/opsx/archive.md",
-      "digest": "digest:d4789c0ad45addcf8a7aaa3cac6f4aea83f582e2af65219bbb0ae76fb40adc43"
+      "digest": "digest:f0ef030cbea9f74ed15055f3916e9fddf5057551aaf713a5c8957ad505a875d7"
     },
     {
       "type": "command",
-      "name": "opsx:design",
-      "path": "commands/opsx/design.md",
-      "sourcePath": ".claude/commands/opsx/design.md",
-      "digest": "digest:c189f43c7ff218084cb1b2e728c17f1aa8001b1c4244ee1505922cb78c3fd478"
+      "name": "opsx:explore",
+      "path": "commands/opsx/explore.md",
+      "sourcePath": ".claude/commands/opsx/explore.md",
+      "digest": "digest:45f76df0b907946adc6c297b3c2cb50ceb135211605735c3abd930c1b6a36d9f"
     },
     {
       "type": "command",
       "name": "opsx:propose",
       "path": "commands/opsx/propose.md",
       "sourcePath": ".claude/commands/opsx/propose.md",
-      "digest": "digest:2ad2f9d5134575b601967d1f39be4b79959c51e6462d71b341fce55a5acb0a8e"
+      "digest": "digest:06d41905d5f2bf4ccf2de7f807b0599738cabcc7c2bba3bb6ba95e15d1bc07f2"
     },
     {
       "type": "skill",
-      "name": "codespec-subagent-driven-development",
-      "path": "skills/codespec-subagent-driven-development/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-subagent-driven-development/SKILL.md",
-      "digest": "digest:422aa583b5c148f9a2d40091825ad3a8d82f719b40865dfac95f7abe52b04c38"
+      "name": "subagent-driven-development",
+      "path": "skills/subagent-driven-development/SKILL.md",
+      "sourcePath": ".claude/skills/subagent-driven-development/SKILL.md",
+      "digest": "digest:025c3a4b4e622d6c91f5bddd3cfd023c2a96e5a623c1e1d778d8c6a9a01f1b3f"
     },
     {
       "type": "skill",
-      "name": "codespec-test-driven-development",
-      "path": "skills/codespec-test-driven-development/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-test-driven-development/SKILL.md",
+      "name": "test-driven-development",
+      "path": "skills/test-driven-development/SKILL.md",
+      "sourcePath": ".claude/skills/test-driven-development/SKILL.md",
       "digest": "digest:376e236180a2d310e74269b323a48a82b0d511866a6ea787045a0f71bb382407"
     },
     {
       "type": "skill",
-      "name": "codespec-verification-before-completion",
-      "path": "skills/codespec-verification-before-completion/SKILL.md",
-      "sourcePath": ".claude/skills/codespec-verification-before-completion/SKILL.md",
+      "name": "verification-before-completion",
+      "path": "skills/verification-before-completion/SKILL.md",
+      "sourcePath": ".claude/skills/verification-before-completion/SKILL.md",
       "digest": "digest:a4803859c566a86dad511c7ddd29bb23edd0bb36eb9d7be99af883274dd1463c"
     },
     {
       "type": "skill",
-      "name": "main-agent-development",
-      "path": "skills/main-agent-development/SKILL.md",
-      "sourcePath": ".claude/skills/main-agent-development/SKILL.md",
-      "digest": "digest:783675afb4ed452a4599bb2a7c8d99480c19d7a3fdd7629cc266f60a9017e523"
-    },
-    {
-      "type": "skill",
-      "name": "writing-plans-main",
-      "path": "skills/writing-plans-main/SKILL.md",
-      "sourcePath": ".claude/skills/writing-plans-main/SKILL.md",
-      "digest": "digest:52a6b9e478982702f96ed9b0b6e8a3db8a4c60d97d16289fee14475790449821"
-    },
-    {
-      "type": "skill",
-      "name": "writing-plans-subagent",
-      "path": "skills/writing-plans-subagent/SKILL.md",
-      "sourcePath": ".claude/skills/writing-plans-subagent/SKILL.md",
-      "digest": "digest:6ac475a9f4ab3aa80ce47ea1991d27dd661732593ebdbd5ad92368cbb27120d4"
+      "name": "writing-plans",
+      "path": "skills/writing-plans/SKILL.md",
+      "sourcePath": ".claude/skills/writing-plans/SKILL.md",
+      "digest": "digest:841e420c5a57fa6d1acc70ef2f4282ad24645b9e7803c7c229fbe868e0421e28"
     }
   ]
 }
